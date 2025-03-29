@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('GIT') {
             steps {
-                git branch: 'mahmoud', url: 'https://github.com/LaameriSayf/DevopsSkiStation.git'
+                git branch: 'mahmoud', url: 'https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
             }
         }
 
@@ -32,7 +32,7 @@ pipeline {
 
        stage('SonarQube Analysis') {
     steps {
-        bat 'mvn sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.login=squ_4234086c09c0c3d568f52b3303480e43ed7d9426'
+bat sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=squ_07531abd1b0d4647483feca27133a80032c71690
     }
 }
 
