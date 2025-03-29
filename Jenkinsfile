@@ -29,15 +29,15 @@ pipeline {
 
         stage('Test Stage') {
             steps {
-                sh 'mvn -X test'
+                sh 'mvn test'
             }
         }
-        
-stage('SonarQube Analysis') {
+
+        stage('SonarQube Analysis') {
             steps {
                     sh 'mvn sonar:sonar'            }
         }
-        
+
         stage('Nexus Deploy') {
             steps {
                 sh 'mvn deploy -DskipTests'
