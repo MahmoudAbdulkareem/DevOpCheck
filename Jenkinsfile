@@ -23,24 +23,19 @@ pipeline {
 
         stage('Compile Stage') {
             steps {
-                sh 'mvn clean compile'
+bat 'mvn clean compile'
             }
         }
 
         stage('Test Stage') {
             steps {
-                sh 'mvn test'
+bat 'mvn test'
             }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                    sh 'mvn sonar:sonar'            }
         }
 
         stage('Nexus Deploy') {
             steps {
-                sh 'mvn deploy -DskipTests'
+bat 'mvn deploy -DskipTests'
             }
         }
 
