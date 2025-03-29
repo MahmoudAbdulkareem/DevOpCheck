@@ -23,7 +23,7 @@ pipeline {
 
         stage('Compile Stage') {
             steps {
-                sh 'mvn clean compile' // This works if Git Bash is available
+bat 'mvn clean compile'
             }
         }
 
