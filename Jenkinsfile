@@ -3,8 +3,7 @@ pipeline {
 
     environment {
      
-        SONAR_HOST_URL = 'http://192.168.33.10:9000'
-        SONAR_LOGIN = 'squ_07531abd1b0d4647483feca27133a80032c71690'  // Replace with your SonarQube token
+      
         NEXUS_REPO = '192.168.33.10:5000'
         IMAGE_NAME = 'gestion-station-ski'
         IMAGE_TAG = 'latest'
@@ -31,11 +30,12 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                bat 'mvn sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_LOGIN}'
-            }
-        }
+       stage('SonarQube Analysis') {
+    steps {
+        bat 'mvn sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.login=squ_4234086c09c0c3d568f52b3303480e43ed7d9426'
+    }
+}
+
 
         stage('Nexus Deploy') {
             steps {
