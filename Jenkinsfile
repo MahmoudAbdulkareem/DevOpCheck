@@ -32,7 +32,11 @@ pipeline {
                 sh 'mvn -X test'
             }
         }
-
+        
+stage('SonarQube Analysis') {
+            steps {
+                    sh 'mvn sonar:sonar'            }
+        }
         
         stage('Nexus Deploy') {
             steps {
