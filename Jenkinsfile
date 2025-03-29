@@ -6,7 +6,7 @@ pipeline {
         M2_HOME = "/opt/apache-maven-3.6.3"
         PATH = "$M2_HOME/bin:$PATH"
         SONAR_HOST_URL = 'http://192.168.33.10:9000'
-        SONAR_LOGIN = 'squ_4234086c09c0c3d568f52b3303480e43ed7d9426'
+        SONAR_LOGIN = 'squ_45a60dbfe1486075041fd1e5ab60d9da21b8a1fd'
         NEXUS_REPO = '192.168.33.10:5000'
         IMAGE_NAME = 'gestion-station-ski'
         IMAGE_TAG = 'latest'
@@ -23,32 +23,32 @@ pipeline {
 
         stage('Compile Stage') {
             steps {
-                sh 'mvn clean compile'
+                bat 'mvn clean compile'
             }
         }
 
         stage('Test Stage') {
             steps {
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                sh 'mvn sonar:sonar'
+                bat 'mvn sonar:sonar'
             }
         }
 
         stage('Nexus Deploy') {
             steps {
-                sh 'mvn deploy -DskipTests'
+                bat 'mvn deploy -DskipTests'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker build -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    bat "docker build -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} ."
                 }
             }
         }
