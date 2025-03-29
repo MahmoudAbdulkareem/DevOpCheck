@@ -1,7 +1,18 @@
 pipeline {
     agent any
 
-
+    environment {
+        JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64/"
+        M2_HOME = "/opt/apache-maven-3.6.3"
+        PATH = "$M2_HOME/bin:$PATH"
+        SONAR_HOST_URL = 'http://192.168.33.10:9000'
+        SONAR_LOGIN = 'squ_4234086c09c0c3d568f52b3303480e43ed7d9426'
+        NEXUS_REPO = '192.168.33.10:5000'
+        IMAGE_NAME = 'gestion-station-ski'
+        IMAGE_TAG = 'latest'
+        NEXUS_USER = 'admin'
+        NEXUS_PASSWORD = '12345678'
+    }
 
     stages {
         stage('GIT') {
@@ -12,20 +23,25 @@ pipeline {
 
         stage('Compile Stage') {
             steps {
-                bat 'mvn clean compile'
+                sh 'mvn clean compile'
             }
         }
 
         stage('Test Stage') {
             steps {
-                bat 'mvn test'
+                sh 'mvn test'
             }
         }
 
-      
+        stage('SonarQube Analysis') {
+            steps {
+                sh 'mvn sonar:sonar'
+            }
+        }
+
         stage('Nexus Deploy') {
             steps {
-                bat 'mvn deploy -DskipTests'
+                sh 'mvn deploy -DskipTests'
             }
         }
 
