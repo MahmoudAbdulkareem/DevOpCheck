@@ -2,9 +2,7 @@ pipeline {
     agent any
 
     environment {
-   
-        SONAR_HOST_URL = 'http://192.168.33.10:9000'
-        SONAR_LOGIN = 'squ_45a60dbfe1486075041fd1e5ab60d9da21b8a1fd'
+
         NEXUS_REPO = '192.168.33.10:5000'
         IMAGE_NAME = 'gestion-station-ski'
         IMAGE_TAG = 'latest'
