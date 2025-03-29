@@ -2,7 +2,11 @@ pipeline {
     agent any
 
     environment {
-
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64/'
+        M2_HOME = '/opt/apache-maven-3.6.3'
+        PATH = "$M2_HOME/bin:$PATH"
+        SONAR_HOST_URL = 'http://192.168.33.10:9000'
+        SONAR_LOGIN = 'squ_07531abd1b0d4647483feca27133a80032c71690'  // Replace with your SonarQube token
         NEXUS_REPO = '192.168.33.10:5000'
         IMAGE_NAME = 'gestion-station-ski'
         IMAGE_TAG = 'latest'
@@ -31,7 +35,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                bat 'mvn sonar:sonar'
+                sh 'mvn sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_LOGIN}'
             }
         }
 
@@ -52,8 +56,8 @@ pipeline {
         stage('Push to Nexus') {
             steps {
                 script {
-                    sh "docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}"
-                    sh "docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    bat "docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}"
+                    bat "docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
                 }
             }
         }
