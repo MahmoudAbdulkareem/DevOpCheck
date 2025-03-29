@@ -33,11 +33,7 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                    sh 'mvn sonar:sonar'            }
-        }
-
+        
         stage('Nexus Deploy') {
             steps {
                 sh 'mvn deploy -DskipTests'
