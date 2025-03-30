@@ -13,10 +13,25 @@ pipeline {
 
     stages {
         stage('GIT') {
+                    steps {
+                        sh 'rm -rf DevOpCheck'
+                        withCredentials([string(credentialsId: 'GithubToken', variable: 'GITHUB_TOKEN')]) {
+                            sh "git clone --branch Mahmoud https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${GITHUB_USERNAME}/DevOpCheck.git"
+                        }
+                    }
+                }
+
+  stage('Maven Settings') {
             steps {
-                sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
+                withCredentials([string(credentialsId: 'GithubToken', variable: 'GITHUB_TOKEN')]) {
+                    sh '''
+                        mkdir -p ~/.m2
+                        echo "<settings><servers><server><id>github</id><username>${GITHUB_USERNAME}</username><password>${GITHUB_TOKEN}</password></server></servers><repositories><repository><id>github</id><url>${MAVEN_REPOSITORY_URL}</url></repository></repositories></settings>" > ~/.m2/settings.xml
+                    '''
+                }
             }
         }
+
 
         stage('Compile Stage') {
             steps {
@@ -37,12 +52,13 @@ pipeline {
         }
 
        stage('Nexus Deploy') {
-           steps {
-
-                   sh 'mvn deploy -DskipTests'
+                   steps {
+                       withCredentials([usernamePassword(credentialsId: 'nexus-credentials', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')]) {
+                           sh 'mvn deploy -DskipTests -s ~/.m2/settings.xml'
+                       }
+                   }
                }
-           }
-       }
+    
 
         stage('Build Docker Image') {
             steps {
