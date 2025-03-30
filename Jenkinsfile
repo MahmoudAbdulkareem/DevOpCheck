@@ -12,7 +12,6 @@ pipeline {
     stages {
         stage('GIT') {
             steps {
-                sh 'rm -rf DevOpCheck'
                 withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
                     sh "git clone --branch Mahmoud https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${GITHUB_USERNAME}/DevOpCheck.git"
                 }
