@@ -39,11 +39,26 @@ pipeline {
 
        stage('Nexus Deploy') {
            steps {
+               withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_TOKEN')]) {
+                   writeFile file: 'settings.xml', text: """<?xml version="1.0" encoding="UTF-8"?>
+                   <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
 
-                   sh 'mvn deploy -DskipTests'
+                       <servers>
+                           <server>
+                               <id>github-repository</id>
+                               <username>${GITHUB_USERNAME}</username>
+                               <password>${GITHUB_TOKEN}</password>
+                           </server>
+                       </servers>
+                   </settings>"""
 
+                   sh 'mvn deploy -DrepositoryId=github-repository -Durl=${MAVEN_REPOSITORY_URL} -s settings.xml -DskipTests'
+               }
            }
        }
+
 
         stage('Build Docker Image') {
             steps {
@@ -52,6 +67,8 @@ pipeline {
                 }
             }
         }
+
+
 
         stage('Push to Nexus') {
             steps {
