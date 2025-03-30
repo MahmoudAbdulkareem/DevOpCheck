@@ -127,10 +127,10 @@
 	<distributionManagement>
 		<repository>
 			<id>github-repository</id>
-			<url>https://maven.pkg.github.com/MahmoudAbdulkareem/gestion-stationskii</url>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck</url>
 		</repository>
 	</distributionManagement>
-
 
 
 </project>
