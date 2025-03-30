@@ -7,16 +7,18 @@ pipeline {
         IMAGE_TAG = 'latest'
         NEXUS_USER = 'admin'
         NEXUS_PASSWORD = '12345678'
+        MAVEN_REPOSITORY_URL = 'https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck'  // GitHub Maven repository URL
+        GITHUB_USERNAME = 'MahmoudAbdulkareem'  // Your GitHub username
+        GITHUB_TOKEN = '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'  // Your GitHub token (store securely in Jenkins)
     }
 
     stages {
-    stage('GIT') {
-        steps {
-            sh 'rm -rf DevOpCheck'  // Remove the existing directory
-            sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
+        stage('GIT') {
+            steps {
+                sh 'rm -rf DevOpCheck'  // Remove the existing directory
+                sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
+            }
         }
-    }
-
 
         stage('Compile Stage') {
             steps {
@@ -38,7 +40,33 @@ pipeline {
 
         stage('Nexus Deploy') {
             steps {
-                sh 'mvn deploy -DskipTests'
+                script {
+                    // Create settings.xml dynamically or make sure it's available
+                    writeFile file: 'settings.xml', text: """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+                              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                              xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+
+                        <servers>
+                            <server>
+                                <id>github-repository</id>
+                                <username>${GITHUB_USERNAME}</username>
+                                <password>${GITHUB_TOKEN}</password>
+                            </server>
+                        </servers>
+                    </settings>
+                    """
+
+                    // Deploy using Maven with the settings.xml file
+                    sh """
+                        mvn deploy \
+                            -DrepositoryId=github-repository \
+                            -Durl=${MAVEN_REPOSITORY_URL} \
+                            -s settings.xml \
+                            -DskipTests
+                    """
+                }
             }
         }
 
