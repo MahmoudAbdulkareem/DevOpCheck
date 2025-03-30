@@ -33,14 +33,14 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                sh 'mvn sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=squ_bade026805312d4fb60dc35ee4039bb99cce0ebd'
+                sh 'mvn sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=squ_0c0407aeb3894cad6a0538dec2817899fce9af74'
             }
         }
 
        stage('Nexus Deploy') {
            steps {
                withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_TOKEN')]) {
-            
+
                    // Run the Maven deploy command to deploy to GitHub Packages
                    sh 'mvn deploy -DrepositoryId=github-repository -Durl=${MAVEN_REPOSITORY_URL} -s settings.xml -DskipTests'
                }
