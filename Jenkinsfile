@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('GIT') {
             steps {
-                git branch: 'mahmoud', url: 'https://github.com/LaameriSayf/DevopsSkiStation.git'
+                git branch: 'mahmoud', url: 'https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
             }
         }
 
@@ -30,12 +30,20 @@ pipeline {
             }
         }
 
+<<<<<<< Updated upstream
        stage('SonarQube Analysis') {
     steps {
 bat sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=squ_07531abd1b0d4647483feca27133a80032c71690
     }
 }
 
+=======
+        stage('SonarQube Analysis') {
+            steps {
+                sh 'mvn sonar:sonar'
+            }
+        }
+>>>>>>> Stashed changes
 
         stage('Nexus Deploy') {
             steps {

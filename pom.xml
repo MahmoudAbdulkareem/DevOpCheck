@@ -128,7 +128,7 @@
 	<distributionManagement>
 		<repository>
 			<id>github-repository</id>
-			<url>https://maven.pkg.github.com/LaameriSayf/DevopsSkiStation</url>
+			<url>https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck</url>
 		</repository>
 	</distributionManagement>
 </project>
