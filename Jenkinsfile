@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+
         NEXUS_REPO = '192.168.33.10:5000'
         IMAGE_NAME = 'gestion-station-ski'
         IMAGE_TAG = 'latest'
@@ -39,11 +40,24 @@ pipeline {
         }
 
         stage('Nexus Deploy') {
-                    steps {
-                        writeFile file: 'settings.xml', text: '''<settings>...</settings>'''
-                        sh 'mvn deploy -DrepositoryId=github-repository -Durl=https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck -s settings.xml -DskipTests'
-                    }
-                }
+                   steps {
+                       writeFile file: 'settings.xml', text: """<?xml version="1.0" encoding="UTF-8"?>
+                       <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+                                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                 xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+
+                           <servers>
+                               <server>
+                                   <id>github-repository</id> 
+                                   <username>${GITHUB_USERNAME}</username>
+                                   <password>${GITHUB_TOKEN}</password>
+                               </server>
+                           </servers>
+
+                       </settings>"""
+                       sh 'mvn deploy -DrepositoryId=github-repository -Durl=https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck -s settings.xml -DskipTests'
+                   }
+               }
 
         stage('Build Docker Image') {
             steps {
