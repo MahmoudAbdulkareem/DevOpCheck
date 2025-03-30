@@ -10,7 +10,7 @@ pipeline {
         NEXUS_PASSWORD = '12345678'
         MAVEN_REPOSITORY_URL = 'https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck'  // GitHub Maven repository URL
         GITHUB_USERNAME = 'MahmoudAbdulkareem'  // Your GitHub username
-        GITHUB_TOKEN = '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'  // Your GitHub token (store securely in Jenkins)
+        GITHUB_TOKEN = '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'  // Your GitHub token (store securely in Jenkins)
     }
 
     stages {
