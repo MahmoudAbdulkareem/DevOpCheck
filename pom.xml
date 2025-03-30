@@ -1,5 +1,7 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -80,6 +82,8 @@
 			<artifactId>springdoc-openapi-ui</artifactId>
 			<version>1.6.12</version>
 		</dependency>
+
+		<!-- JUnit 5 & Mockito dependencies for tests -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
@@ -102,11 +106,14 @@
 				<artifactId>sonar-maven-plugin</artifactId>
 				<version>3.9.1.2184</version>
 			</plugin>
+
+			<!-- Maven Deploy Plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
-				<version>3.1.0</version> <!-- Version stable recommandée -->
+				<version>3.1.0</version>
 			</plugin>
+
 			<!-- Spring Boot Plugin -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -131,6 +138,5 @@
 			<url>https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck</url>
 		</repository>
 	</distributionManagement>
-
 
 </project>

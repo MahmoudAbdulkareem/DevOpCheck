@@ -10,7 +10,7 @@ pipeline {
         NEXUS_PASSWORD = '12345678'
         MAVEN_REPOSITORY_URL = 'https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck'  // GitHub Maven repository URL
         GITHUB_USERNAME = 'MahmoudAbdulkareem'  // Your GitHub username
-        GITHUB_TOKEN = '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'  // Your GitHub token (store securely in Jenkins)
+        GITHUB_TOKEN = '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'  // Your GitHub token (store securely in Jenkins)
     }
 
     stages {
@@ -39,25 +39,26 @@ pipeline {
             }
         }
 
-        stage('Nexus Deploy') {
-                   steps {
-                       writeFile file: 'settings.xml', text: """<?xml version="1.0" encoding="UTF-8"?>
-                       <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
-                                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                 xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+       stage('Nexus Deploy') {
+           steps {
+               writeFile file: 'settings.xml', text: """<?xml version="1.0" encoding="UTF-8"?>
+               <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
 
-                           <servers>
-                               <server>
-                                   <id>github-repository</id>
-                                   <username>${GITHUB_USERNAME}</username>
-                                   <password>${GITHUB_TOKEN}</password>
-                               </server>
-                           </servers>
+                   <servers>
+                       <server>
+                           <id>github-repository</id>
+                           <username>${GITHUB_USERNAME}</username>
+                           <password>${GITHUB_TOKEN}</password>
+                       </server>
+                   </servers>
+               </settings>"""
 
-                       </settings>"""
-                       sh 'mvn deploy -DrepositoryId=github-repository -Durl=https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck -s settings.xml -DskipTests'
-                   }
-               }
+               // Run the Maven deploy command to deploy to GitHub Packages
+               sh 'mvn deploy -DrepositoryId=github-repository -Durl=${MAVEN_REPOSITORY_URL} -s settings.xml -DskipTests'
+           }
+       }
 
         stage('Build Docker Image') {
             steps {

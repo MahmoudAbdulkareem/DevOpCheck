@@ -1,5 +1,34 @@
+version: "3.8"  # Recommended version for compatibility
 
 services:
+  mysqldb:
+    image: mysql:5.7
+    container_name: mysqldb
+    environment:
+      - MYSQL_ROOT_PASSWORD=""  # Empty password for root user
+      - MYSQL_DATABASE=stationSki
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes  # Allow empty password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - devops_network
+
+  gestionski:
+    image: gestion-station-ski:1.0
+    container_name: gestionski
+    ports:
+      - "8089:8089"
+    restart: unless-stopped
+    volumes:
+      - ./logs:/logs
+    depends_on:
+      - mysqldb  # Ensure mysqldb is up before gestionski starts
+    networks:
+      - devops_network
+
   jenkins:
     image: jenkins/jenkins:lts
     container_name: jenkins
@@ -8,6 +37,7 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
+    restart: unless-stopped
     networks:
       - devops_network
 
@@ -20,6 +50,7 @@ services:
       - NEXUS_CONTEXT_PATH=/nexus
     volumes:
       - nexus_data:/nexus-data
+    restart: unless-stopped
     networks:
       - devops_network
 
@@ -28,12 +59,14 @@ services:
     container_name: sonarqube
     ports:
       - "9000:9000"
+    restart: unless-stopped
     networks:
       - devops_network
 
 volumes:
   jenkins_home:
   nexus_data:
+  mysql_data:  # Ensure persistence for MySQL data
 
 networks:
   devops_network:
