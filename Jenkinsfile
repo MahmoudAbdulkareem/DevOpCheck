@@ -6,39 +6,24 @@ pipeline {
         IMAGE_NAME = 'gestion-station-ski'
         IMAGE_TAG = 'latest'
         NEXUS_USER = 'admin'
-        NEXUS_PASSWORD = '12345678'
-        MAVEN_REPOSITORY_URL = 'https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck'
-        GITHUB_USERNAME = 'MahmoudAbdulkareem'
+        NEXUS_PASSWORD = 'MahmoodAbdul12'
     }
 
     stages {
-        stage('GIT') {
-                    steps {
-                        withCredentials([string(credentialsId: 'GithubToken', variable: 'GITHUB_TOKEN')]) {
-                            sh "git clone --branch Mahmoud https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${GITHUB_USERNAME}/DevOpCheck.git"
-                        }
-                    }
-                }
-
-  stage('Maven Settings') {
+        stage('Clone Repository') {
             steps {
-                withCredentials([string(credentialsId: 'GithubToken', variable: 'GITHUB_TOKEN')]) {
-                    sh '''
-                        mkdir -p ~/.m2
-                        echo "<settings><servers><server><id>github</id><username>${GITHUB_USERNAME}</username><password>${GITHUB_TOKEN}</password></server></servers><repositories><repository><id>github</id><url>${MAVEN_REPOSITORY_URL}</url></repository></repositories></settings>" > ~/.m2/settings.xml
-                    '''
-                }
+                sh 'rm -rf DevOpCheck'
+                sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
             }
         }
 
-
-        stage('Compile Stage') {
+        stage('Compile') {
             steps {
                 sh 'mvn clean compile'
             }
         }
 
-        stage('Test Stage') {
+        stage('Run Tests') {
             steps {
                 sh 'mvn test'
             }
@@ -50,33 +35,29 @@ pipeline {
             }
         }
 
-       stage('Nexus Deploy') {
-                   steps {
-                       withCredentials([usernamePassword(credentialsId: 'nexus-credentials', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')]) {
-                           sh 'mvn deploy -DskipTests -s ~/.m2/settings.xml'
-                       }
-                   }
-               }
+    stage('Deploy to Nexus') {
+        steps {
+            withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                sh 'mvn deploy -DskipTests -Dnexus.user=${NEXUS_USER} -Dnexus.password=${NEXUS_PASSWORD}'
+            }
+        }
+    }
 
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh "docker build -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} ."
-                }
+                sh "docker build -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} ."
             }
         }
 
-        stage('Push to Nexus') {
+        stage('Push Docker Image to Nexus') {
             steps {
-                script {
-                    sh "docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}"
-                    sh "docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
-                }
+                sh "docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}"
+                sh "docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
 
-        stage('Docker Compose Up') {
+        stage('Deploy with Docker Compose') {
             steps {
                 sh 'docker-compose down || true'
                 sh 'docker-compose up -d'
@@ -86,10 +67,10 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline executed successfully."
+            echo "Deployment Successful!"
         }
         failure {
-            echo "Pipeline execution failed. Check logs for details."
+            echo "Deployment Failed! Check logs."
         }
     }
 }
