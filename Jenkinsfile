@@ -5,14 +5,12 @@ pipeline {
         NEXUS_REPO = '192.168.33.10:5000'
         IMAGE_NAME = 'gestion-station-ski'
         IMAGE_TAG = 'latest'
-        NEXUS_USER = 'admin'
-        NEXUS_PASSWORD = 'MahmoodAbdul12'
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-                sh 'rm -rf DevOpCheck'
+                sh 'rm -rf DevOpCheck || true'
                 sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
             }
         }
@@ -35,14 +33,21 @@ pipeline {
             }
         }
 
-    stage('Deploy to Nexus') {
-        steps {
-            withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
-                sh 'mvn deploy -DskipTests -Dnexus.user=${NEXUS_USER} -Dnexus.password=${NEXUS_PASSWORD}'
+        stage('Deploy to Nexus') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                    sh 'mvn deploy -DskipTests -Dnexus.user=${NEXUS_USER} -Dnexus.password=${NEXUS_PASSWORD}'
+                }
             }
         }
-    }
 
+        stage('Deploy to GitHub Packages') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'GITHUB_CREDENTIALS', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]) {
+                    sh 'mvn deploy -Pgithub -DskipTests -Dgithub.user=${GITHUB_USER} -Dgithub.token=${GITHUB_TOKEN}'
+                }
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
@@ -52,8 +57,10 @@ pipeline {
 
         stage('Push Docker Image to Nexus') {
             steps {
-                sh "docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}"
-                sh "docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+                withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                    sh "docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}"
+                    sh "docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+                }
             }
         }
 
