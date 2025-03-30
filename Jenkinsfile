@@ -12,7 +12,8 @@ pipeline {
     stages {
         stage('GIT') {
             steps {
-                withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                sh 'rm -rf DevOpCheck'
+                withCredentials([string(credentialsId: 'GithubToken', variable: 'GITHUB_TOKEN')]) {
                     sh "git clone --branch Mahmoud https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${GITHUB_USERNAME}/DevOpCheck.git"
                 }
             }
@@ -20,7 +21,7 @@ pipeline {
 
         stage('Maven Settings') {
             steps {
-                withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                withCredentials([string(credentialsId: 'GithubToken', variable: 'GITHUB_TOKEN')]) {
                     sh '''
                         mkdir -p ~/.m2
                         echo "<settings><servers><server><id>github</id><username>${GITHUB_USERNAME}</username><password>${GITHUB_TOKEN}</password></server></servers><repositories><repository><id>github</id><url>${MAVEN_REPOSITORY_URL}</url></repository></repositories></settings>" > ~/.m2/settings.xml
