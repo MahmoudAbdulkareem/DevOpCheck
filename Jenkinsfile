@@ -2,8 +2,6 @@ pipeline {
     agent any
 
     environment {
-     
-      
         NEXUS_REPO = '192.168.33.10:5000'
         IMAGE_NAME = 'gestion-station-ski'
         IMAGE_TAG = 'latest'
@@ -14,47 +12,38 @@ pipeline {
     stages {
         stage('GIT') {
             steps {
-                git branch: 'mahmoud', url: 'https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
+                sh 'git clone --branch mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
             }
         }
 
         stage('Compile Stage') {
             steps {
-                bat 'mvn clean compile'
+                sh 'mvn clean compile'
             }
         }
 
         stage('Test Stage') {
             steps {
-                bat 'mvn test'
+                sh 'mvn test'
             }
         }
 
-<<<<<<< Updated upstream
-       stage('SonarQube Analysis') {
-    steps {
-bat sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=squ_07531abd1b0d4647483feca27133a80032c71690
-    }
-}
-
-=======
         stage('SonarQube Analysis') {
             steps {
-                sh 'mvn sonar:sonar'
+                sh 'mvn sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=squ_07531abd1b0d4647483feca27133a80032c71690'
             }
         }
->>>>>>> Stashed changes
 
         stage('Nexus Deploy') {
             steps {
-                bat 'mvn deploy -DskipTests'
+                sh 'mvn deploy -DskipTests'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    bat "docker build -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh "docker build -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} ."
                 }
             }
         }
@@ -62,8 +51,8 @@ bat sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=squ_075
         stage('Push to Nexus') {
             steps {
                 script {
-                    bat "docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}"
-                    bat "docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}"
+                    sh "docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
                 }
             }
         }
