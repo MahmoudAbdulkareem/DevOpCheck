@@ -7,14 +7,14 @@ pipeline {
         IMAGE_TAG = 'latest'
         NEXUS_USER = 'admin'
         NEXUS_PASSWORD = '12345678'
-        MAVEN_REPOSITORY_URL = 'https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck'  // GitHub Maven repository URL
-        GITHUB_USERNAME = 'MahmoudAbdulkareem'  // Your GitHub username
+        MAVEN_REPOSITORY_URL = 'https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck'
+        GITHUB_USERNAME = 'MahmoudAbdulkareem'
     }
 
     stages {
         stage('GIT') {
             steps {
-                sh 'rm -rf DevOpCheck'  // Remove the existing directory
+                sh 'rm -rf DevOpCheck'
                 sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
             }
         }
@@ -39,11 +39,9 @@ pipeline {
 
        stage('Nexus Deploy') {
            steps {
-               withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_TOKEN')]) {
 
-                   // Run the Maven deploy command to deploy to GitHub Packages
-                   sh 'mvn deploy -DrepositoryId=github-repository -Durl=${MAVEN_REPOSITORY_URL} -s settings.xml -DskipTests'
-               }
+                   sh 'mvn deploy -DskipTests'
+
            }
        }
 
