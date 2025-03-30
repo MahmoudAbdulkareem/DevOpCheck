@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('GIT') {
             steps {
-                sh 'git clone --branch mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
+                sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
             }
         }
 
