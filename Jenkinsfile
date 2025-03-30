@@ -10,11 +10,13 @@ pipeline {
     }
 
     stages {
-        stage('GIT') {
-            steps {
-                sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
-            }
+    stage('GIT') {
+        steps {
+            sh 'rm -rf DevOpCheck'  // Remove the existing directory
+            sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
         }
+    }
+
 
         stage('Compile Stage') {
             steps {
@@ -30,7 +32,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                sh 'mvn sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=squ_07531abd1b0d4647483feca27133a80032c71690'
+                sh 'mvn sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=squ_bade026805312d4fb60dc35ee4039bb99cce0ebd'
             }
         }
 
