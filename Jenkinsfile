@@ -6,85 +6,76 @@ pipeline {
         IMAGE_NAME = 'gestion-station-ski'
         IMAGE_TAG = 'latest'
         NEXUS_USER = 'admin'
-
-        // Securely retrieve credentials from Jenkins
-        NEXUS_PASSWORD = credentials('NEXUS_PASSWORD')  // Nexus Password from Jenkins Credentials
-        SONAR_TOKEN = credentials('SONARQUBE_TOKEN')  // SonarQube Token from Jenkins Credentials
+        NEXUS_PASSWORD = '12345678'
+        MAVEN_REPOSITORY_URL = 'https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck'
+        GITHUB_USERNAME = 'MahmoudAbdulkareem'
     }
 
     stages {
-        stage('Clone Repository') {
+        stage('GIT') {
             steps {
-                echo "🛠️ Cloning repository..."
-                sh 'rm -rf DevOpCheck || true'
+                sh 'rm -rf DevOpCheck'  // Remove the existing directory
                 sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
             }
         }
 
-        stage('Compile Code') {
+        stage('Compile Stage') {
             steps {
-                echo "🛠️ Compiling code..."
                 sh 'mvn clean compile'
             }
         }
 
-        stage('Run Tests') {
+        stage('Test Stage') {
             steps {
-                echo "🧪 Running tests..."
                 sh 'mvn test'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                echo "🔍 Running SonarQube analysis..."
-                sh 'mvn sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=${SONAR_TOKEN}'
+                sh 'mvn sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=squ_bade026805312d4fb60dc35ee4039bb99cce0ebd'
             }
         }
 
         stage('Nexus Deploy') {
-                    steps {
-                        withCredentials([string(credentialsId: 'GITHUB_PAT', variable: 'GITHUB_TOKEN')]) {
-                            writeFile file: 'settings.xml', text: """<?xml version="1.0" encoding="UTF-8"?>
-                            <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
-                                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                      xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
-
-                                <servers>
-                                    <server>
-                                        <id>github-repository</id>
-                                        <username>${GITHUB_USERNAME}</username>
-                                        <password>${GITHUB_TOKEN}</password>
-                                    </server>
-                                </servers>
-
-                            </settings>"""
-
-                            sh 'mvn deploy -DrepositoryId=github-repository -Durl=${MAVEN_REPOSITORY_URL} -s settings.xml -DskipTests'
-                        }
-                    }
-
-
-        stage('Build Docker Image') {
             steps {
-                echo "🐳 Building Docker image..."
-                sh "docker build -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                    writeFile file: 'settings.xml', text: """<?xml version="1.0" encoding="UTF-8"?>
+                    <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+                              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                              xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+                        <servers>
+                            <server>
+                                <id>github-repository</id>
+                                <username>${GITHUB_USERNAME}</username>
+                                <password>${GITHUB_TOKEN}</password>
+                            </server>
+                        </servers>
+                    </settings>"""
+                    sh 'mvn deploy -DrepositoryId=github-repository -Durl=https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck -s settings.xml -DskipTests'
+                }
             }
         }
 
-        stage('Push Docker Image to Nexus') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    echo "📤 Pushing Docker image to Nexus..."
+                    sh "docker build -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                }
+            }
+        }
+
+        stage('Push to Nexus') {
+            steps {
+                script {
                     sh "docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}"
                     sh "docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
                 }
             }
         }
 
-        stage('Deploy with Docker Compose') {
+        stage('Docker Compose Up') {
             steps {
-                echo "🚀 Deploying using Docker Compose..."
                 sh 'docker-compose down || true'
                 sh 'docker-compose up -d'
             }
@@ -93,10 +84,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Pipeline executed successfully!"
+            echo "Pipeline executed successfully."
         }
         failure {
-            echo "❌ Pipeline failed! Check logs for errors."
+            echo "Pipeline execution failed. Check logs for details."
         }
     }
 }
