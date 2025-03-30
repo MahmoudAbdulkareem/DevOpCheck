@@ -132,20 +132,18 @@
 	</build>
 
 	<distributionManagement>
+		<!-- Nexus Repository for Releases -->
 		<repository>
-			<id>github-repository</id>
-			<name>GitHub Packages</name>
-			<url>https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck</url>
+			<id>nexus</id>
+			<url>http://192.168.33.10:8081/repository/maven-releases/</url>
 		</repository>
-			<repository>
-				<id>nexus</id>
-				<url>http://192.168.33.10:8081/repository/maven-releases/</url>
-			</repository>
-			<snapshotRepository>
-				<id>nexus</id>
-				<url>http://192.168.33.10:8081/repository/maven-snapshots/</url>
-			</snapshotRepository>
 
+		<!-- Nexus Repository for Snapshots -->
+		<snapshotRepository>
+			<id>nexus</id>
+			<url>http://192.168.33.10:8081/repository/maven-snapshots/</url>
+		</snapshotRepository>
 	</distributionManagement>
+
 
 </project>
