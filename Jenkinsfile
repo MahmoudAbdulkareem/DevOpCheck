@@ -8,11 +8,11 @@ pipeline {
         NEXUS_USER = 'admin'
 
         // Securely retrieve credentials from Jenkins
-        NEXUS_PASSWORD = credentials('NEXUS_PASSWORD')
+        NEXUS_PASSWORD = credentials('NEXUS_PASSWORD')  // Jenkins Secret for Nexus
         MAVEN_REPOSITORY_URL = 'https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck'
         GITHUB_USERNAME = 'MahmoudAbdulkareem'
-        GITHUB_TOKEN = credentials('GITHUB_PAT')
-        SONAR_TOKEN = credentials('SONARQUBE_TOKEN')
+        GITHUB_TOKEN = credentials('GITHUB_PAT')  // Jenkins Secret for GitHub Token
+        SONAR_TOKEN = credentials('SONARQUBE_TOKEN')  // Jenkins Secret for SonarQube
     }
 
     stages {
