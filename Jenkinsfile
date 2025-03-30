@@ -40,21 +40,7 @@ pipeline {
        stage('Nexus Deploy') {
            steps {
                withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_TOKEN')]) {
-                   // Create Maven settings.xml for GitHub repository authentication
-                   writeFile file: 'settings.xml', text: """<?xml version="1.0" encoding="UTF-8"?>
-                   <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
-                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
-
-                       <servers>
-                           <server>
-                               <id>github-repository</id>
-                               <username>${GITHUB_USERNAME}</username>
-                               <password>${GITHUB_TOKEN}</password>
-                           </server>
-                       </servers>
-                   </settings>"""
-
+            
                    // Run the Maven deploy command to deploy to GitHub Packages
                    sh 'mvn deploy -DrepositoryId=github-repository -Durl=${MAVEN_REPOSITORY_URL} -s settings.xml -DskipTests'
                }
