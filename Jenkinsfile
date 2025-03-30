@@ -10,7 +10,6 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                sh 'rm -rf DevOpCheck || true'
                 sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
             }
         }
