@@ -11,7 +11,7 @@
 
 	<groupId>tn.esprit.spring</groupId>
 	<artifactId>gestion-stationskii</artifactId>
-	<version>1.3.1</version>
+	<version>1.3.5</version>
 	<name>gestion-course</name>
 
 	<properties>
