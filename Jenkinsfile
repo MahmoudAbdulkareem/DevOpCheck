@@ -1,66 +1,95 @@
 pipeline {
-     agent any
+    agent any
 
-     environment {
-         NEXUS_REPO = '192.168.33.10:5000'
-         IMAGE_NAME = 'gestion-station-ski'
-         IMAGE_TAG = 'latest'
-         NEXUS_USER = 'admin'
+    environment {
 
-         // Securely retrieve credentials from Jenkins
-         NEXUS_PASSWORD = credentials('NEXUS_PASSWORD')  // Jenkins Secret for Nexus
-         MAVEN_REPOSITORY_URL = 'https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck'
-         GITHUB_USERNAME = 'MahmoudAbdulkareem'
-         GITHUB_TOKEN = credentials('GITHUB_PAT')  // Jenkins Secret for GitHub Token
-         SONAR_TOKEN = credentials('SONARQUBE_TOKEN')  // Jenkins Secret for SonarQube
-         NEXUS_PASSWORD = credentials('NEXUS_PASSWORD')  // Nexus Password from Jenkins Credentials
-         SONAR_TOKEN = credentials('SONARQUBE_TOKEN')  // SonarQube Token from Jenkins Credentials
-     }
+        NEXUS_REPO = '192.168.33.10:5000'
+        IMAGE_NAME = 'gestion-station-ski'
+        IMAGE_TAG = 'latest'
+        NEXUS_USER = 'admin'
+        NEXUS_PASSWORD = '12345678'
+        MAVEN_REPOSITORY_URL = 'https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck'  // GitHub Maven repository URL
+        GITHUB_USERNAME = 'MahmoudAbdulkareem'  // Your GitHub username
+        GITHUB_TOKEN = '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'  // Your GitHub token (store securely in Jenkins)
+    }
 
-     stages {
-         stage('Clone Repository') {
-             steps {
-                 echo "🛠️ Cloning repository..."
-                 sh 'rm -rf DevOpCheck || true'  // Ensure no leftover directory
-                 sh 'rm -rf DevOpCheck || true'
-                 sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
-             }
-         }
- @@ -48,21 +45,23 @@
-         stage('Deploy to GitHub Packages') {
-             steps {
-                 echo "📦 Deploying artifacts to GitHub Packages..."
-                 script {
-                     writeFile file: 'settings.xml', text: """<?xml version="1.0" encoding="UTF-8"?>
-                     <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
-                               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                               xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
-                         <servers>
-                             <server>
-                                 <id>github-repository</id>
-                                 <username>${env.GITHUB_USERNAME}</username>
-                                 <password>${env.GITHUB_TOKEN}</password>
-                             </server>
-                         </servers>
-                     </settings>"""
-                 withCredentials([string(credentialsId: 'GITHUB_PAT', variable: 'GITHUB_TOKEN')]) {
-                     script {
-                         writeFile file: 'settings.xml', text: """<?xml version="1.0" encoding="UTF-8"?>
-                         <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
-                                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                   xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
-                             <servers>
-                                 <server>
-                                     <id>github-repository</id>
-                                     <username>MahmoudAbdulkareem</username>
-                                     <password>\${env.GITHUB_TOKEN}</password>
-                                 </server>
-                             </servers>
-                         </settings>"""
+    stages {
+        stage('GIT') {
+            steps {
+                sh 'rm -rf DevOpCheck'  // Remove the existing directory
+                sh 'git clone --branch Mahmoud https://github.com/MahmoudAbdulkareem/DevOpCheck.git'
+            }
+        }
 
-                     sh 'mvn deploy -DrepositoryId=github-repository -Durl=${MAVEN_REPOSITORY_URL} -s settings.xml -DskipTests'
-                         sh 'mvn deploy -DrepositoryId=github-repository -Durl=https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck -s settings.xml -DskipTests'
-                     }
-                 }
-             }
-         }
+        stage('Compile Stage') {
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
+
+        stage('Test Stage') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                sh 'mvn sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=squ_bade026805312d4fb60dc35ee4039bb99cce0ebd'
+            }
+        }
+
+        stage('Nexus Deploy') {
+                   steps {
+                       writeFile file: 'settings.xml', text: """<?xml version="1.0" encoding="UTF-8"?>
+                       <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+                                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                 xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+
+                           <servers>
+                               <server>
+                                   <id>github-repository</id>
+                                   <username>${GITHUB_USERNAME}</username>
+                                   <password>${GITHUB_TOKEN}</password>
+                               </server>
+                           </servers>
+
+                       </settings>"""
+                       sh 'mvn deploy -DrepositoryId=github-repository -Durl=https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck -s settings.xml -DskipTests'
+                   }
+               }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                }
+            }
+        }
+
+        stage('Push to Nexus') {
+            steps {
+                script {
+                    sh "docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}"
+                    sh "docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Docker Compose Up') {
+            steps {
+                sh 'docker-compose down || true'
+                sh 'docker-compose up -d'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline executed successfully."
+        }
+        failure {
+            echo "Pipeline execution failed. Check logs for details."
+        }
+    }
+}
