@@ -48,7 +48,7 @@ pipeline {
 
                            <servers>
                                <server>
-                                   <id>github-repository</id> 
+                                   <id>github-repository</id>
                                    <username>${GITHUB_USERNAME}</username>
                                    <password>${GITHUB_TOKEN}</password>
                                </server>

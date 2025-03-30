@@ -127,7 +127,9 @@
 	<distributionManagement>
 		<repository>
 			<id>github-repository</id>
+			<name>GitHub OWNER Apache Maven Packages</name>
 			<url>https://maven.pkg.github.com/MahmoudAbdulkareem/DevOpCheck</url>
 		</repository>
 	</distributionManagement>
+
 </project>
