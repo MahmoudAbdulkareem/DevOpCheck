@@ -5,8 +5,8 @@ pipeline {
         NEXUS_REPO = '192.168.33.10:5000'
         IMAGE_NAME = 'gestion-station-ski'
         IMAGE_TAG = 'latest'
-        NEXUS_USER = 'admin'
-        echo $NEXUS_PASSWORD
+         NEXUS_USER = 'admin'
+            NEXUS_PASSWORD = 'MahmoodAbdul12'
 
     }
 
@@ -44,9 +44,10 @@ pipeline {
 
         stage('Deploy to Nexus') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
-                    sh 'mvn deploy -DskipTests'
-                }
+             withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                 sh 'mvn deploy -DskipTests'
+             }
+
             }
         }
 
