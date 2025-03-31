@@ -2,12 +2,11 @@ pipeline {
     agent any
 
     environment {
-        NEXUS_REPO = '192.168.33.10:5000'
-        IMAGE_NAME = 'gestion-station-ski'
+        NEXUS_REPO = '192.168.33.10:8081'
+        IMAGE_NAME = 'gestion-stationski'
         IMAGE_TAG = 'latest'
-         NEXUS_USER = 'admin'
-            NEXUS_PASSWORD = 'MahmoodAbdul12'
-
+        NEXUS_USER = 'admin'
+        NEXUS_PASSWORD = 'MahmoodAbdul12'
     }
 
     stages {
@@ -42,26 +41,25 @@ pipeline {
             }
         }
 
-        stage('Deploy to Nexus') {
-            steps {
-             withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
-                 sh 'mvn deploy -DskipTests'
-             }
-
-            }
-        }
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                sh """
+                    docker build \
+                    --build-arg NEXUS_USER=${NEXUS_USER} \
+                    --build-arg NEXUS_PASSWORD=${NEXUS_PASSWORD} \
+                    -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} .
+                """
             }
         }
 
         stage('Push Docker Image to Nexus') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
-                    sh "docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}"
-                    sh "docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh """
+                        docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}
+                        docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                    """
                 }
             }
         }
