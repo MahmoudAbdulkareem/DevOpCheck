@@ -57,40 +57,6 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                dir('DevOpCheck') {
-                    withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
-                        sh """
-                            docker build \\
-                            --build-arg NEXUS_USER=${NEXUS_USER} \\
-                            --build-arg NEXUS_PASSWORD=${NEXUS_PASSWORD} \\
-                            -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} .
-                        """
-                    }
-                }
-            }
-        }
-
-        stage('Push Docker Image to Nexus') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
-                    sh """
-                        docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}
-                        docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
-                    """
-                }
-            }
-        }
-
-        stage('Deploy with Docker Compose') {
-            steps {
-                dir('DevOpCheck') {
-                    sh 'docker-compose down || true'
-                    sh 'docker-compose up -d'
-                }
-            }
-        }
     }
 
     post {
