@@ -1,6 +1,8 @@
 pipeline {
     agent any
-
+  environment {
+        MAVEN_HOME = tool name: 'Maven 3.9', type: 'maven'
+    }
     environment {
         IMAGE_NAME = 'gestion-stationski'
         IMAGE_TAG = 'latest'
@@ -47,12 +49,12 @@ pipeline {
 
         stage('Deploy to Nexus') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                    sh '''
-                        mvn deploy -DaltDeploymentRepository=nexus::default::http://192.168.33.10:8081/repository/gestionski/ \
-                                   -Dnexus.username=$NEXUS_USER -Dnexus.password=$NEXUS_PASS
-                    '''
-                }
+                 withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                                    sh """
+                                        ${MAVEN_HOME}/bin/mvn clean deploy \
+                                        -DaltDeploymentRepository=nexus::default::http://$NEXUS_USER:$NEXUS_PASS@192.168.33.10:8081/repository/gestionski/
+                                    """
+                                }
 
             }
         }
