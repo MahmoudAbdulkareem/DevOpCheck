@@ -47,16 +47,48 @@ pipeline {
 
         stage('Deploy to Nexus') {
             steps {
-                 withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIAL', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                                    sh """
-                                        ${MAVEN_HOME}/bin/mvn clean deploy \
-                                        -DaltDeploymentRepository=nexus::default::http://$NEXUS_USER:$NEXUS_PASS@192.168.33.10:8081/repository/gestionski/
-                                    """
-                                }
+                withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIAL', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                    sh "mvn deploy -DaltDeploymentRepository=nexus::default::http://192.168.33.10:8081/repository/gestionski/ -s settings.xml"
+
+                }
 
             }
         }
 
+        stage('Build Docker Image') {
+            steps {
+                dir('DevOpCheck') {
+                    withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                        sh """
+                            docker build \\
+                            --build-arg NEXUS_USER=${NEXUS_USER} \\
+                            --build-arg NEXUS_PASSWORD=${NEXUS_PASSWORD} \\
+                            -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} .
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Image to Nexus') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                    sh """
+                        docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}
+                        docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                dir('DevOpCheck') {
+                    sh 'docker-compose down || true'
+                    sh 'docker-compose up -d'
+                }
+            }
+        }
     }
 
     post {
