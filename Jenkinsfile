@@ -47,7 +47,7 @@ pipeline {
 
         stage('Deploy to Nexus') {
             steps {
-                 withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                 withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIAL', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
                                     sh """
                                         ${MAVEN_HOME}/bin/mvn clean deploy \
                                         -DaltDeploymentRepository=nexus::default::http://$NEXUS_USER:$NEXUS_PASS@192.168.33.10:8081/repository/gestionski/
