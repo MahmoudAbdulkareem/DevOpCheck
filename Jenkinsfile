@@ -10,7 +10,7 @@ pipeline {
         NEXUS_PORT = '8081'
         NEXUS_REPO = 'gestionski'
         NEXUS_REPO_URL = "${NEXUS_PROTOCOL}://${NEXUS_HOST}:${NEXUS_PORT}/repository/${NEXUS_REPO}/"
-        NEXUS_CREDENTIAL_ID = 'NEXUS_CREDENTIALS'
+        NEXUS_CREDENTIAL_ID = 'NEXUS_CREDENTIAL'
     }
 
     stages {
