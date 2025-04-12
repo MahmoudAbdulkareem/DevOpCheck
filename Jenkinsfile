@@ -60,7 +60,7 @@ pipeline {
                 dir('DevOpCheck') {
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
                         sh '''
-                            echo "$NEXUS_PASSWORD" | docker login -u "$NEXUS_USER" --password-stdin ${NEXUS_PROTOCOL}://${NEXUS_HOST}:${NEXUS_PORT}
+                            echo "$NEXUS_PASSWORD" | docker login -u "mahmoudabdulkareem" --password-stdin ${NEXUS_HOST}:${NEXUS_PORT}
                             docker build \
                                 --build-arg NEXUS_USER=$NEXUS_USER \
                                 --build-arg NEXUS_PASSWORD=$NEXUS_PASSWORD \
