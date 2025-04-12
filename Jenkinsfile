@@ -1,11 +1,10 @@
 pipeline {
     agent any
-  environment {
-        MAVEN_HOME = tool name: 'Maven 3.9', type: 'maven'
-    }
+
     environment {
         IMAGE_NAME = 'gestion-stationski'
         IMAGE_TAG = 'latest'
+        MAVEN_HOME = tool name: 'Maven 3.9', type: 'maven'
 
         NEXUS_PROTOCOL = 'http'
         NEXUS_HOST = '192.168.33.10'
