@@ -1,21 +1,23 @@
 pipeline {
     agent any
-  tools {
-            maven 'MAVEN'
-        }
+
+    tools {
+        maven 'MAVEN'
+    }
+
     environment {
         IMAGE_NAME = 'gestion-stationski'
         IMAGE_TAG = 'latest'
-       NEXUS_PROTOCOL = 'http'
-            NEXUS_HOST = '192.168.33.10'
-            NEXUS_PORT = '8081'
-            NEXUS_REPO = "${NEXUS_HOST}:${NEXUS_PORT}"
-            NEXUS_VERSION = 'nexus3'
-            NEXUS_REPOSITORY = 'gestionski'
-            NEXUS_CREDENTIAL_ID = 'NEXUS_CREDENTIALS'
 
-            SONAR_URL = 'http://192.168.33.10:9000'
+        NEXUS_PROTOCOL = 'http'
+        NEXUS_HOST = '192.168.33.10'
+        NEXUS_PORT = '8081'
+        NEXUS_REPO = "${NEXUS_HOST}:${NEXUS_PORT}"
+        NEXUS_VERSION = 'nexus3'
+        NEXUS_REPOSITORY = 'gestionski'
+        NEXUS_CREDENTIAL_ID = 'NEXUS_CREDENTIALS'
 
+        SONAR_URL = 'http://192.168.33.10:9000'
     }
 
     stages {
@@ -28,48 +30,56 @@ pipeline {
 
         stage('Update Version in POM') {
             steps {
-                sh 'mvn versions:set -DnewVersion=1.3.6-SNAPSHOT'
+                dir('DevOpCheck') {
+                    sh 'mvn versions:set -DnewVersion=1.3.6-SNAPSHOT'
+                }
             }
         }
 
         stage('Compile') {
             steps {
-                sh 'mvn clean compile'
+                dir('DevOpCheck') {
+                    sh 'mvn clean compile'
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'mvn test'
+                dir('DevOpCheck') {
+                    sh 'mvn test'
+                }
             }
         }
 
-
-
-
-            stage('Deploy to Nexus') {
-                steps {
-                    dir("${env.WORK_DIR}") {
-                        withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
-                            sh 'mvn deploy -DskipTests'
-                        }
+        stage('Deploy to Nexus') {
+            steps {
+                dir('DevOpCheck') {
+                    withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                        sh 'mvn deploy -DskipTests'
                     }
                 }
             }
+        }
+
         stage('Build Docker Image') {
             steps {
-                sh """
-                    docker build \
-                    --build-arg NEXUS_USER=${NEXUS_USER} \
-                    --build-arg NEXUS_PASSWORD=${NEXUS_PASSWORD} \
-                    -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} .
-                """
+                dir('DevOpCheck') {
+                    withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                        sh """
+                            docker build \\
+                            --build-arg NEXUS_USER=${NEXUS_USER} \\
+                            --build-arg NEXUS_PASSWORD=${NEXUS_PASSWORD} \\
+                            -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} .
+                        """
+                    }
+                }
             }
         }
 
         stage('Push Docker Image to Nexus') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
                     sh """
                         docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}
                         docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
@@ -80,18 +90,20 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             steps {
-                sh 'docker-compose down || true'
-                sh 'docker-compose up -d'
+                dir('DevOpCheck') {
+                    sh 'docker-compose down || true'
+                    sh 'docker-compose up -d'
+                }
             }
         }
     }
 
     post {
         success {
-            echo "Deployment Successful!"
+            echo "✅ Deployment Successful!"
         }
         failure {
-            echo "Deployment Failed! Check logs."
+            echo "❌ Deployment Failed! Check logs."
         }
     }
 }
