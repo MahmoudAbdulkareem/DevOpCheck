@@ -49,13 +49,15 @@ pipeline {
 
         stage('Deploy to Nexus') {
             steps {
-                dir('DevOpCheck') {
-withCredentials([usernamePassword(credentialsId: 'nexus-creds-id', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-    sh "mvn deploy -DskipTests -Dnexus.username=$NEXUS_USER -Dnexus.password=$NEXUS_PASS"
-                    }
+                withCredentials([usernamePassword(credentialsId: 'nexus-credentials-id', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                    sh '''
+                        mvn deploy -DaltDeploymentRepository=nexus::default::http://your-nexus-url/repository/maven-releases/ \
+                                   -Dnexus.username=$NEXUS_USER -Dnexus.password=$NEXUS_PASS
+                    '''
                 }
             }
         }
+
 
         stage('Build Docker Image') {
             steps {
