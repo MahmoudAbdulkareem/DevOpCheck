@@ -51,8 +51,9 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'nexus-credentials-id', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
                     sh '''
-                        mvn deploy -DaltDeploymentRepository=nexus::default::http://your-nexus-url/repository/maven-releases/ \
+                        mvn deploy -DaltDeploymentRepository=nexus::default::http://192.168.33.10:8081/gestionski/maven-releases/ \
                                    -Dnexus.username=$NEXUS_USER -Dnexus.password=$NEXUS_PASS
+
                     '''
                 }
             }
