@@ -47,11 +47,11 @@ pipeline {
 
         stage('Deploy to Nexus') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIAL', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                    sh "mvn deploy -DaltDeploymentRepository=nexus::default::http://192.168.33.10:8081/repository/gestionski/ -s .jenkins/settings.xml"
-
+                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                    dir('DevOpCheck') {
+                        sh "mvn deploy -DaltDeploymentRepository=nexus::default::${NEXUS_REPO_URL} -s .jenkins/settings.xml"
+                    }
                 }
-
             }
         }
 
@@ -59,12 +59,13 @@ pipeline {
             steps {
                 dir('DevOpCheck') {
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
-                        sh """
-                            docker build \\
-                            --build-arg NEXUS_USER=${NEXUS_USER} \\
-                            --build-arg NEXUS_PASSWORD=${NEXUS_PASSWORD} \\
-                            -t ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} .
-                        """
+                        sh '''
+                            echo "$NEXUS_PASSWORD" | docker login -u "$NEXUS_USER" --password-stdin ${NEXUS_HOST}:${NEXUS_PORT}
+                            docker build \
+                                --build-arg NEXUS_USER=$NEXUS_USER \
+                                --build-arg NEXUS_PASSWORD=$NEXUS_PASSWORD \
+                                -t ${NEXUS_HOST}:${NEXUS_PORT}/${IMAGE_NAME}:${IMAGE_TAG} .
+                        '''
                     }
                 }
             }
@@ -72,11 +73,11 @@ pipeline {
 
         stage('Push Docker Image to Nexus') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
-                    sh """
-                        docker login -u ${NEXUS_USER} -p ${NEXUS_PASSWORD} ${NEXUS_REPO}
-                        docker push ${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
-                    """
+                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                    sh '''
+                        echo "$NEXUS_PASSWORD" | docker login -u "$NEXUS_USER" --password-stdin ${NEXUS_HOST}:${NEXUS_PORT}
+                        docker push ${NEXUS_HOST}:${NEXUS_PORT}/${IMAGE_NAME}:${IMAGE_TAG}
+                    '''
                 }
             }
         }
