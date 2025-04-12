@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'MAVEN'
-    }
-
     environment {
         IMAGE_NAME = 'gestion-stationski'
         IMAGE_TAG = 'latest'
@@ -16,8 +12,6 @@ pipeline {
         NEXUS_VERSION = 'nexus3'
         NEXUS_REPOSITORY = 'gestionski'
         NEXUS_CREDENTIAL_ID = 'NEXUS_CREDENTIALS'
-
-        SONAR_URL = 'http://192.168.33.10:9000'
     }
 
     stages {
@@ -51,6 +45,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Deploy to Nexus') {
             steps {
