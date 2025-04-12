@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'gestion-stationski'
+        IMAGE_NAME = 'mahmoudabdulkareem1/gestion-stationski'
         IMAGE_TAG = 'latest'
 
         NEXUS_PROTOCOL = 'http'
@@ -11,7 +11,7 @@ pipeline {
         NEXUS_REPO = 'gestionski'
         NEXUS_REPO_URL = "${NEXUS_PROTOCOL}://${NEXUS_HOST}:${NEXUS_PORT}/repository/${NEXUS_REPO}/"
         NEXUS_CREDENTIAL_ID = 'NEXUS_CREDENTIAL'
-        DOCKERHUB_CREDENTIALS = credentials('Docker_ID')  // Docker Hub credentials from Jenkins
+        DOCKERHUB_CREDENTIALS = credentials('Docker_ID')
     }
 
     stages {
