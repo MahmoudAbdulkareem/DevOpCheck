@@ -8,9 +8,8 @@ pipeline {
         NEXUS_PROTOCOL = 'http'
         NEXUS_HOST = '192.168.33.10'
         NEXUS_PORT = '8081'
-        NEXUS_REPO = "${NEXUS_HOST}:${NEXUS_PORT}"
-        NEXUS_VERSION = 'nexus3'
-        NEXUS_REPOSITORY = 'gestionski'
+        NEXUS_REPO = 'gestionski'
+        NEXUS_REPO_URL = "${NEXUS_PROTOCOL}://${NEXUS_HOST}:${NEXUS_PORT}/repository/${NEXUS_REPO}/"
         NEXUS_CREDENTIAL_ID = 'NEXUS_CREDENTIALS'
     }
 
@@ -46,19 +45,16 @@ pipeline {
             }
         }
 
-
         stage('Deploy to Nexus') {
             steps {
-withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-    sh '''
-        mvn deploy -DaltDeploymentRepository=nexus::default::http://192.168.33.10:8081/repository/gestionski/ \
-                   -Dnexus.username=$NEXUS_USER -Dnexus.password=$NEXUS_PASS
-    '''
-}
-
+                withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                    sh '''
+                        mvn deploy -DaltDeploymentRepository=nexus::default::${NEXUS_REPO_URL} \
+                                   -Dnexus.username=$NEXUS_USER -Dnexus.password=$NEXUS_PASS
+                    '''
+                }
             }
         }
-
 
         stage('Build Docker Image') {
             steps {
