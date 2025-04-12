@@ -49,10 +49,11 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDENTIALS', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
                     sh '''
-                        mvn deploy -DaltDeploymentRepository=nexus::default::${NEXUS_REPO_URL} \
+                        mvn deploy -DaltDeploymentRepository=nexus::default::http://192.168.33.10:8081/repository/gestionski/ \
                                    -Dnexus.username=$NEXUS_USER -Dnexus.password=$NEXUS_PASS
                     '''
                 }
+
             }
         }
 
