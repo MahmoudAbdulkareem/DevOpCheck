@@ -1,12 +1,21 @@
 pipeline {
     agent any
-
+  tools {
+            maven 'MAVEN'
+        }
     environment {
-        NEXUS_REPO = '192.168.33.10:8081'
         IMAGE_NAME = 'gestion-stationski'
         IMAGE_TAG = 'latest'
-        NEXUS_USER = 'admin'
-        NEXUS_PASSWORD = 'MahmoodAbdul12'
+       NEXUS_PROTOCOL = 'http'
+            NEXUS_HOST = '192.168.33.10'
+            NEXUS_PORT = '8081'
+            NEXUS_REPO = "${NEXUS_HOST}:${NEXUS_PORT}"
+            NEXUS_VERSION = 'nexus3'
+            NEXUS_REPOSITORY = 'gestionski'
+            NEXUS_CREDENTIAL_ID = 'NEXUS_CREDENTIALS'
+
+            SONAR_URL = 'http://192.168.33.10:9000'
+
     }
 
     stages {
@@ -35,18 +44,18 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                sh 'mvn sonar:sonar -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.token=${SONAR_TOKEN}'
+
+
+
+            stage('Deploy to Nexus') {
+                steps {
+                    dir("${env.WORK_DIR}") {
+                        withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIAL_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                            sh 'mvn deploy -DskipTests'
+                        }
+                    }
+                }
             }
-        }
-
-        stage('Deploy to Nexus') {
-            steps {
-                 sh 'mvn deploy -DskipTests'
-             }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh """
