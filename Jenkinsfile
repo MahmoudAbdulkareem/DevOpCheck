@@ -120,9 +120,9 @@ pipeline {
                         echo "Exporting IMAGE_TAG for Docker Compose..."
                         export IMAGE_TAG=${IMAGE_TAG}
                         echo "Starting Docker Compose with IMAGE_TAG=${IMAGE_TAG}..."
-                        docker-compose up -d --build
+docker compose up -d --build
                         echo "Checking running containers..."
-                        docker-compose ps
+docker compose ps
                         '''
                     } finally {
                         def endTime = System.currentTimeMillis()
