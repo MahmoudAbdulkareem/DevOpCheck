@@ -8,8 +8,9 @@ pipeline {
         NEXUS_PROTOCOL = 'http'
         NEXUS_HOST = '192.168.33.10'
         NEXUS_PORT = '8081'
-        NEXUS_REPO = 'gestionski'
+        NEXUS_REPO = 'docker-hosted'
         NEXUS_REPO_URL = "${NEXUS_PROTOCOL}://${NEXUS_HOST}:${NEXUS_PORT}/repository/${NEXUS_REPO}/"
+
         NEXUS_CREDENTIAL_ID = 'NEXUS_CREDENTIAL'
         DOCKERHUB_CREDENTIALS = credentials('Docker_ID')
     }
@@ -120,9 +121,9 @@ pipeline {
                         echo "Exporting IMAGE_TAG for Docker Compose..."
                         export IMAGE_TAG=${IMAGE_TAG}
                         echo "Starting Docker Compose with IMAGE_TAG=${IMAGE_TAG}..."
-docker compose up -d --build
+                        docker compose up -d --build
                         echo "Checking running containers..."
-docker compose ps
+                        docker compose ps
                         '''
                     } finally {
                         def endTime = System.currentTimeMillis()
