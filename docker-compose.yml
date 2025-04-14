@@ -17,7 +17,7 @@ services:
       - devops_network
 
   gestionski:
-    image: ${NEXUS_HOST}:${NEXUS_PORT}/${IMAGE_NAME}:${IMAGE_TAG}  # Use variables from Jenkins pipeline
+    image: http://192.168.33.10:8081/repository/gestionski/${IMAGE_NAME}:${IMAGE_TAG}
     container_name: gestionski
     ports:
       - "8089:8089"
