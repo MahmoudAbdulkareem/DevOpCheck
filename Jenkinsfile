@@ -1,19 +1,20 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = 'mahmoudabdulkareem1/gestion-stationski'
-        IMAGE_TAG = 'latest'
+   environment {
+       IMAGE_NAME = 'mahmoudabdulkareem1/gestion-stationski'
+       IMAGE_TAG = 'latest'
 
-        NEXUS_PROTOCOL = 'http'
-        NEXUS_HOST = '192.168.33.10'
-        NEXUS_PORT = '8081'
-        NEXUS_REPO = 'docker-hosted'
-        NEXUS_REPO_URL = "${NEXUS_PROTOCOL}://${NEXUS_HOST}:${NEXUS_PORT}/repository/${NEXUS_REPO}/"
+       NEXUS_PROTOCOL = 'http'
+       NEXUS_HOST = '192.168.33.10'
+       NEXUS_PORT = '8081'
+       NEXUS_REPO = 'gestionski'  // Make sure this matches the repository name in Nexus
+       NEXUS_REPO_URL = "${NEXUS_PROTOCOL}://${NEXUS_HOST}:${NEXUS_PORT}/repository/${NEXUS_REPO}/"
 
-        NEXUS_CREDENTIAL_ID = 'NEXUS_CREDENTIAL'
-        DOCKERHUB_CREDENTIALS = credentials('Docker_ID')
-    }
+       NEXUS_CREDENTIAL_ID = 'NEXUS_CREDENTIAL'
+       DOCKERHUB_CREDENTIALS = credentials('Docker_ID')
+   }
+
 
     stages {
         stage('Clone Repository') {
